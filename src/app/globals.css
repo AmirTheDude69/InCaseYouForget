@@ -1,0 +1,43 @@
+:root {
+  --bg-sand: #f3dfc1;
+  --bg-blush: #f0c8c4;
+  --bg-rosewood: #5a1e2a;
+  --paper-main: #f8ecd2;
+  --paper-edge: #ddc499;
+  --ink-red: #9d1824;
+  --ink-dark: #4a1c22;
+  --accent-gold: #9f7f4b;
+  --font-romantic: "Palatino Linotype", "Book Antiqua", "Cormorant Garamond",
+    "Times New Roman", serif;
+  --font-display: "Snell Roundhand", "Apple Chancery", "Lucida Handwriting",
+    "Brush Script MT", cursive;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-romantic);
+  color: var(--ink-dark);
+  background:
+    radial-gradient(circle at 15% 18%, rgba(255, 234, 217, 0.72), transparent 45%),
+    radial-gradient(circle at 83% 72%, rgba(176, 55, 67, 0.26), transparent 41%),
+    linear-gradient(130deg, var(--bg-sand), var(--bg-blush) 54%, #f4d6b4);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
