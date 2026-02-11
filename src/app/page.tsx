@@ -27,6 +27,23 @@ const statusLabel: Record<LetterStatus, string> = {
   archived: "Archived",
 };
 
+function CassetteIcon({ active }: { active: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className={styles.cassetteIcon}
+      data-active={active}
+    >
+      <rect x="3.5" y="6" width="17" height="12" rx="1.6" ry="1.6" />
+      <circle cx="8.5" cy="12" r="2.1" />
+      <circle cx="15.5" cy="12" r="2.1" />
+      <path d="M6.2 8.6h11.6" />
+      <path d="M7 15.9h10" />
+    </svg>
+  );
+}
+
 function HeartIcon({ active }: { active: boolean }) {
   return (
     <svg aria-hidden="true" viewBox="0 0 64 64" className={styles.lineIcon}>
@@ -47,7 +64,7 @@ function EnvelopeIcon({ active }: { active: boolean }) {
   );
 }
 
-function statusClass(status: LetterStatus) {
+const statusClass = (status: LetterStatus) => {
   if (status === "hearted") {
     return styles.statusHearted;
   }
@@ -57,7 +74,7 @@ function statusClass(status: LetterStatus) {
   }
 
   return styles.statusRead;
-}
+};
 
 export default function Home() {
   const [letters, setLetters] = useState<Letter[]>([]);
@@ -65,9 +82,9 @@ export default function Home() {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isUncrumpling, setIsUncrumpling] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
+  const [isUncrumpling, setIsUncrumpling] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const unfoldTimerRef = useRef<number | null>(null);
@@ -202,11 +219,6 @@ export default function Home() {
     [activeAudioId, stopAudio],
   );
 
-  const closeLetter = useCallback(() => {
-    stopAudio();
-    setCurrentId(null);
-  }, [stopAudio]);
-
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -328,22 +340,36 @@ export default function Home() {
 
     unfoldTimerRef.current = window.setTimeout(() => {
       setIsUncrumpling(false);
-    }, 800);
+    }, 700);
   }, [markRead, stopAudio, unseenLetters]);
 
-  const viewClass = showArchive
-    ? styles.pageArchive
+  const closeLetter = useCallback(() => {
+    stopAudio();
+    setCurrentId(null);
+  }, [stopAudio]);
+
+  const modeClass = showArchive
+    ? styles.archiveMode
     : currentLetter
-      ? styles.pageLetter
-      : styles.pageCover;
+      ? styles.letterMode
+      : styles.coverMode;
 
   return (
-    <div className={`${styles.page} ${viewClass}`}>
+    <div className={`${styles.page} ${modeClass}`}>
+      <div className={styles.chromeBar} aria-hidden="true">
+        <span className={`${styles.dot} ${styles.dotRed}`} />
+        <span className={`${styles.dot} ${styles.dotAmber}`} />
+        <span className={`${styles.dot} ${styles.dotGreen}`} />
+      </div>
+
       {!loading && !error && letters.length > 0 && (
         <button
           type="button"
-          className={styles.archiveLink}
-          onClick={() => setShowArchive((previous) => !previous)}
+          className={styles.topLink}
+          onClick={() => {
+            setShowArchive((previous) => !previous);
+            stopAudio();
+          }}
         >
           {showArchive ? "Back" : "Archive"}
         </button>
@@ -375,24 +401,35 @@ export default function Home() {
 
       {!loading && !error && letters.length > 0 && !showArchive && !currentLetter && (
         <section className={styles.coverScene}>
-          <div className={styles.coverPaper}>
-            <button
-              type="button"
-              className={styles.coverSeal}
-              onClick={openRandomLetter}
-              disabled={unseenLetters.length === 0}
-              aria-label={unseenLetters.length === 0 ? "No notes left" : "Open"}
-            />
-            <h1 className={styles.coverTitle}>In Case You Forget</h1>
+          <div className={styles.coverSheet}>
+            <div className={styles.coverPaper}>
+              <button
+                type="button"
+                className={styles.sealTile}
+                onClick={openRandomLetter}
+                disabled={unseenLetters.length === 0}
+                aria-label={
+                  unseenLetters.length === 0
+                    ? "No unopened letters"
+                    : "Open a random letter"
+                }
+              >
+                <span className={styles.sealMark} />
+              </button>
+
+              <h1 className={styles.coverTitle}>
+                In Case You
+                <br />
+                Forget
+              </h1>
+            </div>
           </div>
 
-          {unseenLetters.length === 0 ? (
-            <p className={styles.sceneNote}>
-              Every letter has been opened. Use Archive to revisit them.
-            </p>
-          ) : (
-            <p className={styles.sceneNote}>{unseenLetters.length} sealed letters</p>
-          )}
+          <p className={styles.coverNote}>
+            {unseenLetters.length === 0
+              ? "Every letter has been opened. Use Archive to revisit them."
+              : `${unseenLetters.length} sealed letters waiting.`}
+          </p>
         </section>
       )}
 
@@ -401,67 +438,63 @@ export default function Home() {
           className={`${styles.letterScene} ${isUncrumpling ? styles.uncrumple : ""}`}
         >
           <div className={styles.letterBoard}>
-            <div className={styles.tagPin}>
-              <span>{currentLetter.tag}</span>
+            <div className={styles.letterTop}>
+              <span className={styles.letterTag}>{currentLetter.tag}</span>
+              <span className={styles.letterNumber}>{currentLetter.number}</span>
             </div>
 
             <button
               type="button"
-              className={styles.cassetteCard}
+              className={styles.floatCassette}
               onClick={() => toggleAudio(currentLetter)}
               aria-label={
                 activeAudioId === currentLetter.id ? "Stop audio" : "Play audio"
               }
               disabled={!currentLetter.audio}
-              data-playing={activeAudioId === currentLetter.id}
             >
-              <span className={styles.cassetteGlyph} aria-hidden="true" />
+              <CassetteIcon active={activeAudioId === currentLetter.id} />
             </button>
 
-            <span className={styles.letterNumber}>{currentLetter.number}</span>
+            <p className={styles.letterText}>{currentLetter.text}</p>
 
-            <article className={styles.parchment}>
-              <p className={styles.letterText}>{currentLetter.text}</p>
+            <div className={styles.letterActions}>
+              <button
+                type="button"
+                className={`${styles.iconAction} ${
+                  currentStatus === "hearted" ? styles.iconActionActive : ""
+                }`}
+                onClick={() => {
+                  updateStatus(currentLetter.id, "hearted");
+                  closeLetter();
+                }}
+                aria-label="Heart this note"
+              >
+                <HeartIcon active={currentStatus === "hearted"} />
+              </button>
 
-              <div className={styles.letterActions}>
-                <button
-                  type="button"
-                  className={`${styles.iconAction} ${
-                    currentStatus === "hearted" ? styles.iconActionActive : ""
-                  }`}
-                  onClick={() => {
-                    updateStatus(currentLetter.id, "hearted");
-                    closeLetter();
-                  }}
-                  aria-label="Heart this note"
-                >
-                  <HeartIcon active={currentStatus === "hearted"} />
-                </button>
-
-                <button
-                  type="button"
-                  className={`${styles.iconAction} ${
-                    currentStatus === "archived" ? styles.iconActionActive : ""
-                  }`}
-                  onClick={() => {
-                    updateStatus(currentLetter.id, "archived");
-                    closeLetter();
-                  }}
-                  aria-label="Archive this note"
-                >
-                  <EnvelopeIcon active={currentStatus === "archived"} />
-                </button>
-              </div>
-            </article>
+              <button
+                type="button"
+                className={`${styles.iconAction} ${
+                  currentStatus === "archived" ? styles.iconActionActive : ""
+                }`}
+                onClick={() => {
+                  updateStatus(currentLetter.id, "archived");
+                  closeLetter();
+                }}
+                aria-label="Archive this note"
+              >
+                <EnvelopeIcon active={currentStatus === "archived"} />
+              </button>
+            </div>
           </div>
 
           <button
             type="button"
-            className={styles.openNext}
+            className={styles.nextSeal}
             onClick={openRandomLetter}
             disabled={unseenLetters.length === 0}
           >
-            {unseenLetters.length === 0 ? "No sealed notes left" : "Open next seal"}
+            {unseenLetters.length === 0 ? "No unopened letters left" : "Open next"}
           </button>
         </section>
       )}
@@ -501,9 +534,8 @@ export default function Home() {
                           activeAudioId === letter.id ? "Stop audio" : "Play audio"
                         }
                         disabled={!letter.audio}
-                        data-playing={activeAudioId === letter.id}
                       >
-                        <span className={styles.cassetteGlyph} aria-hidden="true" />
+                        <CassetteIcon active={activeAudioId === letter.id} />
                       </button>
                     </div>
                   </article>
