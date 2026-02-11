@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import ScratchCard from "@/components/ScratchCard";
 import styles from "./page.module.css";
 
 type Letter = {
@@ -20,6 +21,33 @@ type LetterState = {
 };
 
 const STORAGE_KEY = "in-case-you-forget-actions-v1";
+const SCRATCH_REVEAL_IMAGE = `data:image/svg+xml,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380">
+    <defs>
+      <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#f5e6cc"/>
+        <stop offset="55%" stop-color="#e0bf92"/>
+        <stop offset="100%" stop-color="#c49669"/>
+      </linearGradient>
+      <radialGradient id="wax" cx="35%" cy="28%" r="70%">
+        <stop offset="0%" stop-color="#de7e7a"/>
+        <stop offset="62%" stop-color="#982438"/>
+        <stop offset="100%" stop-color="#711829"/>
+      </radialGradient>
+    </defs>
+    <rect width="600" height="380" fill="url(#paper)"/>
+    <g opacity="0.2" fill="#8a653f">
+      <circle cx="48" cy="56" r="2.2"/><circle cx="98" cy="196" r="1.8"/><circle cx="181" cy="74" r="2.1"/>
+      <circle cx="292" cy="143" r="1.6"/><circle cx="354" cy="62" r="2.3"/><circle cx="417" cy="184" r="1.9"/>
+      <circle cx="521" cy="102" r="2.1"/><circle cx="563" cy="246" r="1.8"/><circle cx="87" cy="304" r="2"/>
+      <circle cx="228" cy="286" r="2.3"/><circle cx="398" cy="312" r="1.7"/><circle cx="531" cy="318" r="2"/>
+    </g>
+    <circle cx="300" cy="170" r="72" fill="url(#wax)"/>
+    <circle cx="300" cy="170" r="58" fill="none" stroke="#f2b5b4" stroke-opacity="0.35" stroke-width="2"/>
+    <text x="300" y="180" text-anchor="middle" fill="#f8d0ca" font-family="serif" font-size="26" font-style="italic">open me</text>
+    <text x="300" y="295" text-anchor="middle" fill="#6f1f2b" font-family="serif" font-size="34" font-style="italic">A letter waits below</text>
+  </svg>`,
+)}`;
 
 const statusLabel: Record<LetterStatus, string> = {
   read: "Read",
@@ -411,35 +439,37 @@ export default function Home() {
         )}
 
         {!loading && !error && letters.length > 0 && !showArchive && !currentLetter && (
-          <section className={styles.deskScene}>
-            <div className={styles.envelopeCluster}>
-              <div className={styles.envelopeShadowOne} aria-hidden="true" />
-              <div className={styles.envelopeShadowTwo} aria-hidden="true" />
+          <section className={styles.scratchScene}>
+            {unseenLetters.length > 0 ? (
+              <>
+                <div className={styles.scratchFrame}>
+                  <div className={styles.scratchGlow} aria-hidden="true" />
+                  <ScratchCard
+                    className={styles.scratchCard}
+                    scratchMode="scratch"
+                    useImage
+                    bottomImage={{ src: SCRATCH_REVEAL_IMAGE, alt: "Hidden letter preview" }}
+                    topLayerColor="#d8bc94"
+                    textColor="#6e1f2b"
+                    topText="Scratch To Unseal"
+                    brushSize={38}
+                    borderRadius={18}
+                    revealThreshold={0.43}
+                    onRevealComplete={openRandomLetter}
+                  />
+                </div>
 
-              <button
-                type="button"
-                className={styles.mainEnvelope}
-                onClick={openRandomLetter}
-                disabled={unseenLetters.length === 0}
-                aria-label={
-                  unseenLetters.length === 0
-                    ? "All letters opened"
-                    : "Open a random sealed letter"
-                }
-              >
-                <span className={styles.envelopeFlap} aria-hidden="true" />
-                <span className={styles.envelopeSeal}>Open</span>
-                <span className={styles.envelopeAddress}>for my love</span>
-              </button>
-            </div>
-
-            <h2 className={styles.deskTitle}>A sealed memory waits for you</h2>
-
-            <p className={styles.deskNote}>
-              {unseenLetters.length === 0
-                ? "Every letter has been opened. Visit the archive to read them again."
-                : `${unseenLetters.length} sealed letters remain.`}
-            </p>
+                <h2 className={styles.scratchTitle}>Uncover your next love letter</h2>
+                <p className={styles.scratchNote}>{unseenLetters.length} unread letters</p>
+              </>
+            ) : (
+              <div className={styles.emptyDesk}>
+                <h2 className={styles.scratchTitle}>No sealed letters left</h2>
+                <p className={styles.scratchNote}>
+                  Every letter has been opened. Visit the archive to revisit them.
+                </p>
+              </div>
+            )}
           </section>
         )}
 

@@ -95,147 +95,82 @@
   color: #7d1629;
 }
 
-.deskScene {
+.scratchScene {
   min-height: 75svh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.1rem;
+  gap: 1rem;
   text-align: center;
 }
 
-.envelopeCluster {
-  position: relative;
-  width: min(88vw, 31rem);
-  aspect-ratio: 1.18;
-}
-
-.envelopeShadowOne,
-.envelopeShadowTwo {
-  position: absolute;
-  inset: 0;
-  border-radius: 1rem;
+.scratchFrame {
+  width: min(92vw, 34rem);
+  aspect-ratio: 1.4;
+  border-radius: 1.2rem;
+  padding: clamp(0.9rem, 2.6vw, 1.25rem);
   background:
-    linear-gradient(145deg, rgba(244, 221, 188, 0.92), rgba(220, 189, 145, 0.92)),
+    linear-gradient(145deg, rgba(242, 216, 178, 0.94), rgba(213, 173, 121, 0.94)),
     repeating-linear-gradient(
       0deg,
-      rgba(123, 88, 49, 0.08),
-      rgba(123, 88, 49, 0.08) 1px,
+      rgba(120, 82, 43, 0.09),
+      rgba(120, 82, 43, 0.09) 1px,
       transparent 1px,
-      transparent 7px
+      transparent 8px
     );
-  border: 1px solid rgba(116, 80, 46, 0.42);
-  box-shadow: 0 16px 24px rgba(33, 20, 12, 0.24);
-}
-
-.envelopeShadowOne {
-  transform: rotate(-6deg) translate(-1.2rem, 0.8rem);
-}
-
-.envelopeShadowTwo {
-  transform: rotate(5deg) translate(1.4rem, 0.9rem);
-}
-
-.mainEnvelope {
-  position: absolute;
-  inset: 0;
-  border: 1px solid rgba(123, 84, 49, 0.58);
-  border-radius: 1.1rem;
-  background:
-    linear-gradient(150deg, #f5dfbc, #e4be8e 52%, #cca173),
-    repeating-linear-gradient(
-      0deg,
-      rgba(113, 78, 45, 0.09),
-      rgba(113, 78, 45, 0.09) 1px,
-      transparent 1px,
-      transparent 6px
-    );
+  border: 1px solid rgba(113, 73, 36, 0.45);
   box-shadow:
-    0 20px 30px rgba(30, 16, 8, 0.3),
-    inset 0 -20px 28px rgba(122, 77, 31, 0.16);
-  padding: clamp(1.3rem, 3vw, 1.8rem);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.2rem;
-  transition: transform 170ms ease;
-}
-
-.mainEnvelope:hover {
-  transform: translateY(-2px);
-}
-
-.mainEnvelope:disabled {
-  cursor: default;
-  opacity: 0.7;
-  transform: none;
-}
-
-.envelopeFlap {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 49%;
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
-  background: linear-gradient(180deg, #f8e8cb, #deb583 82%);
-  border-bottom: 1px solid rgba(117, 81, 45, 0.45);
-  opacity: 0.92;
-}
-
-.envelopeSeal {
+    0 24px 34px rgba(34, 20, 10, 0.34),
+    inset 0 -12px 18px rgba(104, 70, 37, 0.18);
   position: relative;
-  z-index: 2;
-  width: clamp(5.6rem, 13vw, 7.2rem);
-  aspect-ratio: 1;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  color: #ffd8cd;
-  font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(1.35rem, 3vw, 1.75rem);
-  background:
-    radial-gradient(circle at 30% 26%, #d36f6a, #91222e 62%, #741928),
-    linear-gradient(130deg, #ab3041, #711424);
-  box-shadow:
-    inset 0 9px 11px rgba(244, 180, 180, 0.25),
-    inset 0 -10px 14px rgba(83, 11, 23, 0.42),
-    0 9px 12px rgba(53, 15, 17, 0.34);
 }
 
-.envelopeSeal::before {
-  content: "";
+.scratchGlow {
   position: absolute;
-  inset: 0.45rem;
-  border-radius: 999px;
-  border: 1px dashed rgba(255, 227, 223, 0.62);
+  inset: -0.4rem;
+  border-radius: 1.4rem;
+  background: radial-gradient(circle, rgba(112, 29, 35, 0.28), transparent 67%);
+  filter: blur(8px);
+  pointer-events: none;
+  z-index: -1;
 }
 
-.envelopeAddress {
-  position: relative;
-  z-index: 1;
-  margin-top: 4.8rem;
-  color: #6f1b24;
-  font-family: "Pinyon Script", "Brush Script MT", cursive;
-  font-size: clamp(2rem, 4.4vw, 3rem);
-  letter-spacing: 0.02em;
+.scratchCard {
+  border-radius: 0.9rem;
 }
 
-.deskTitle {
+.scratchTitle {
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(2.2rem, 5.5vw, 4rem);
+  font-size: clamp(2.1rem, 5.5vw, 4rem);
   color: #711824;
   line-height: 0.95;
   text-shadow: 0 10px 20px rgba(48, 17, 12, 0.28);
 }
 
-.deskNote {
+.scratchNote {
   font-family: "Cormorant Garamond", "Times New Roman", serif;
   font-size: clamp(1rem, 2vw, 1.3rem);
   color: #5e332f;
+}
+
+.emptyDesk {
+  width: min(94vw, 32rem);
+  border: 1px solid rgba(109, 71, 35, 0.4);
+  border-radius: 1rem;
+  padding: 1.2rem;
+  background:
+    linear-gradient(152deg, rgba(245, 223, 188, 0.92), rgba(222, 190, 144, 0.92)),
+    repeating-linear-gradient(
+      0deg,
+      rgba(117, 81, 44, 0.08),
+      rgba(117, 81, 44, 0.08) 1px,
+      transparent 1px,
+      transparent 8px
+    );
+  box-shadow: 0 12px 24px rgba(34, 20, 10, 0.24);
+  display: grid;
+  gap: 0.4rem;
 }
 
 .letterScene {
@@ -592,12 +527,8 @@
     min-height: calc(100svh - 5.3rem);
   }
 
-  .envelopeCluster {
-    width: min(92vw, 25.5rem);
-  }
-
-  .envelopeAddress {
-    margin-top: 3.7rem;
+  .scratchFrame {
+    width: min(94vw, 28rem);
   }
 
   .parchment {
@@ -624,12 +555,12 @@
     padding-bottom: 1rem;
   }
 
-  .deskScene {
+  .scratchScene {
     gap: 0.85rem;
   }
 
-  .envelopeCluster {
-    width: min(94vw, 21.5rem);
+  .scratchFrame {
+    width: min(95vw, 22rem);
   }
 
   .archiveGrid {
