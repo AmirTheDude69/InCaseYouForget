@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@400;700&family=Permanent+Marker&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Dancing+Script:wght@400;700&family=Pinyon+Script&display=swap");
 
 * {
   box-sizing: border-box;
@@ -12,9 +12,7 @@ body {
 }
 
 body {
-  font-family: "Playfair Display", "Times New Roman", serif;
-  color: #3f2c24;
-  background: #e9e0ca;
+  font-family: "Cormorant Garamond", "Times New Roman", serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }

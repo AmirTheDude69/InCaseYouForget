@@ -20,43 +20,64 @@ type LetterState = {
 };
 
 const STORAGE_KEY = "in-case-you-forget-actions-v1";
-const PAPER_TEXTURE_URL =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuC7_MiOtnax-mz3VLI7n8gKIZP9qUXFfWO0c1npBMZD6ly-xckyMBr3tYLKd355wUPMfUAMPpbRn9oya4hVKZ-DyKK74i7YAnFMgdOjxIDRaLsy3J0pFE7GKRbxYI3VrrbNHR0wpUYx2oLy5m2FVB7kCzGzNWWA7M2GOznR9L-Xp8O5feJGU5AWnWEKABcdmxto38-Xxx81v3T4CT6mKqAx70vt4raF1V1sv2ABYcHVWPnbGVcvTTgrquhdo3jKpr7h1ze9ea_TCiYQ";
-const SEAL_URL =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAaoc4Tj7JOz04FRzb8gocT9CAz03tB1ZeP5QTJVTmjbCv1z91kopaXLbGP_HolGmjBEc9V5I1hX_390yPMYx2tqqPYUVe8Yj8-AfajFJ0w7h4RshqVfQiYmYFMLEDRYby_x8YIfEyfpe40TdEPeg8gwGwBtmCJl9_TVUo5Gvls4-Pr4LAcAnJ0ORsi81cIHDdoMqkWLd0EuQADxWGnXbnsopMjIomYIAhtgUrXwW47rhgxszS_9KIgiZu0-1jlJp6-YZgkJDu6X91a";
-const CASSETTE_URL =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuArDdwO2TwDBSq_ZeJuvv1WkQwflMB4vZZP5fjnXaPBt0oLZ8mG31zHtHFrGlpBWciCyXqW-yJHd9S-0CCCuKq0wA48hZiNxko-oCd8hhaQBpsTlJOyBwEreqFwwrkOWcrumfMvRgL_dq8YrxR8DpFN1oBIKIqJFkxbs247uBNEephEls94ZXFR4ExszboybPzXhMv3zhplNCwMjCrz-wFNzOTzSchOQLrZ3HbaseCx41i-cF5m67CqpIG4awA4ExW-aRyXRHFQ2rRc";
-const HEART_URL =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuCv16Lcxaf1bYusyc_ptpKOFKQKiaaMpRMk2TJv0aGtmQghfyvhzmrseTKj12fJTZNOaJzTsdSOqVsZB3tUgBhtMgAIPFN6L4NWfYMpGZ2-r62AlT6-CYXT_tpRhZZR8u_TXMI2DAw1pNfiUYgdjBYOKL5dslWkbQQ7dQ-ktug51Bbrj02_jr7Y-eFef-g-pJYpBM5h_bjr2MY_6VnsOj0yf17DtjcXYogi-d75InLnZnVPO_ZVIfjswZ4AQQC9rnjwLgFs5RBr1q7z";
-const ENVELOPE_URL =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuApN3_q4Zweo1PbpL92-ubFqxKOLp5oRYH_xCpqpA4SSGYg8vwSWjicWqE7Z7iEvvJvovEF4hokjXZT6hW0oJjTQmoprH5vyktlLneCUdqt23wgc13-ygvdHsxL_NTQ4jUHcTiZgRnt6J3jrn5ULDeRd_zXSrotgb_COcceReNNdC3goG21qgIKkpxh_Tdw9sh2_lGEFEWuUig7YxQz1K-qN2LU2gQpOODPQHFkZgwjihJ7HIq5ck6bCo5JWt6LUyI9X75HiJ6gsG6H";
 
 const statusLabel: Record<LetterStatus, string> = {
   read: "Read",
-  hearted: "Hearted",
+  hearted: "Loved",
   archived: "Archived",
 };
 
-function CassetteIcon({ active }: { active: boolean }) {
+function CassetteIcon({ playing }: { playing: boolean }) {
   return (
     <svg
       aria-hidden="true"
-      viewBox="0 0 24 24"
-      className={styles.cassetteSvg}
+      viewBox="0 0 64 64"
+      className={styles.iconCassette}
+      data-playing={playing}
+    >
+      <rect x="8" y="14" width="48" height="36" rx="5" ry="5" />
+      <circle cx="23" cy="32" r="7" />
+      <circle cx="41" cy="32" r="7" />
+      <path d="M16 22h32" />
+      <path d="M16 44h32" />
+      <path d="M28 32h8" />
+    </svg>
+  );
+}
+
+function HeartIcon({ active }: { active: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 64 64"
+      className={styles.iconSketch}
       data-active={active}
     >
-      <rect x="3.5" y="6" width="17" height="12" rx="1.5" ry="1.5" />
-      <circle cx="8.5" cy="12" r="2" />
-      <circle cx="15.5" cy="12" r="2" />
-      <path d="M6.2 8.6h11.6" />
-      <path d="M7 15.8h10" />
+      <path d="M32 53C27 47 10 37 10 22c0-6 5-11 11-11 5 0 9 3 11 7 2-4 6-7 11-7 6 0 11 5 11 11 0 15-17 25-22 31z" />
+      <path d="M20 18c2-2 4-3 6-3" />
+    </svg>
+  );
+}
+
+function EnvelopeIcon({ active }: { active: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 64 64"
+      className={styles.iconSketch}
+      data-active={active}
+    >
+      <rect x="10" y="17" width="44" height="30" rx="4" ry="4" />
+      <path d="M10 21l22 17 22-17" />
+      <path d="M10 47l16-14" />
+      <path d="M54 47L38 33" />
     </svg>
   );
 }
 
 const statusClass = (status: LetterStatus) => {
   if (status === "hearted") {
-    return styles.statusHearted;
+    return styles.statusLoved;
   }
 
   if (status === "archived") {
@@ -72,12 +93,12 @@ export default function Home() {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isUncrumpling, setIsUncrumpling] = useState(false);
+  const [isUnfurling, setIsUnfurling] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const unfoldTimerRef = useRef<number | null>(null);
+  const unfurlTimerRef = useRef<number | null>(null);
 
   const setAndPersistActions = useCallback(
     (
@@ -281,8 +302,8 @@ export default function Home() {
 
   useEffect(() => {
     return () => {
-      if (unfoldTimerRef.current) {
-        window.clearTimeout(unfoldTimerRef.current);
+      if (unfurlTimerRef.current) {
+        window.clearTimeout(unfurlTimerRef.current);
       }
 
       stopAudio();
@@ -311,6 +332,10 @@ export default function Home() {
     [currentId, letters],
   );
 
+  const currentStatus = currentLetter
+    ? actions[currentLetter.id]?.status ?? "read"
+    : null;
+
   const openRandomLetter = useCallback(() => {
     if (unseenLetters.length === 0) {
       return;
@@ -323,18 +348,18 @@ export default function Home() {
     setCurrentId(selected.id);
     markRead(selected.id);
     setShowArchive(false);
-    setIsUncrumpling(true);
+    setIsUnfurling(true);
 
-    if (unfoldTimerRef.current) {
-      window.clearTimeout(unfoldTimerRef.current);
+    if (unfurlTimerRef.current) {
+      window.clearTimeout(unfurlTimerRef.current);
     }
 
-    unfoldTimerRef.current = window.setTimeout(() => {
-      setIsUncrumpling(false);
-    }, 750);
+    unfurlTimerRef.current = window.setTimeout(() => {
+      setIsUnfurling(false);
+    }, 900);
   }, [markRead, stopAudio, unseenLetters]);
 
-  const onTopLinkClick = () => {
+  const onTopAction = () => {
     stopAudio();
 
     if (showArchive) {
@@ -346,199 +371,196 @@ export default function Home() {
     setShowArchive(true);
   };
 
-  const modeClass = showArchive
-    ? styles.archiveMode
-    : currentLetter
-      ? styles.openedMode
-      : styles.coverMode;
-
   return (
-    <div className={`${styles.page} ${modeClass}`}>
-      <div className={styles.browserBar} aria-hidden="true">
-        <span className={`${styles.dot} ${styles.dotRed}`} />
-        <span className={`${styles.dot} ${styles.dotAmber}`} />
-        <span className={`${styles.dot} ${styles.dotGreen}`} />
-      </div>
+    <div className={styles.page}>
+      <div className={styles.grain} aria-hidden="true" />
 
-      {!loading && !error && letters.length > 0 && (
-        <button type="button" className={styles.topLink} onClick={onTopLinkClick}>
-          {showArchive ? "Back" : "Archive"}
-        </button>
-      )}
+      <header className={styles.header}>
+        <h1 className={styles.headerTitle}>In Case You Forget</h1>
 
-      {loading && (
-        <section className={styles.messageCard}>
-          <p>Gathering letters from your sheet...</p>
-        </section>
-      )}
+        {!loading && !error && letters.length > 0 && (
+          <button type="button" className={styles.headerLink} onClick={onTopAction}>
+            {showArchive ? "Back to Desk" : "Archive"}
+          </button>
+        )}
+      </header>
 
-      {!loading && error && (
-        <section className={styles.messageCard}>
-          <h2>Could not load the letters</h2>
-          <p>{error}</p>
-          <p>
-            Ensure the Google Sheet is shareable for anyone with the link and
-            includes columns named <strong>#</strong>, <strong>Tag</strong>,
-            <strong> Text</strong>, and <strong>Audio</strong>.
-          </p>
-        </section>
-      )}
+      <main className={styles.main}>
+        {loading && (
+          <section className={styles.messageCard}>
+            <p>Gathering your letters from the sheet...</p>
+          </section>
+        )}
 
-      {!loading && !error && letters.length === 0 && (
-        <section className={styles.messageCard}>
-          <p>No entries were found in the sheet yet.</p>
-        </section>
-      )}
+        {!loading && error && (
+          <section className={styles.messageCard}>
+            <h2>Could not load the letters</h2>
+            <p>{error}</p>
+            <p>
+              Ensure the Google Sheet is shared for anyone with the link and has
+              columns named <strong>#</strong>, <strong>Tag</strong>,
+              <strong> Text</strong>, and <strong>Audio</strong>.
+            </p>
+          </section>
+        )}
 
-      {!loading && !error && letters.length > 0 && !showArchive && !currentLetter && (
-        <section className={styles.coverScreen}>
-          <div className={styles.coverPaperWrap}>
-            <div
-              className={styles.coverPaper}
-              style={{
-                backgroundImage: `url(${PAPER_TEXTURE_URL})`,
-              }}
-            >
+        {!loading && !error && letters.length === 0 && (
+          <section className={styles.messageCard}>
+            <p>No entries were found in the sheet yet.</p>
+          </section>
+        )}
+
+        {!loading && !error && letters.length > 0 && !showArchive && !currentLetter && (
+          <section className={styles.deskScene}>
+            <div className={styles.envelopeCluster}>
+              <div className={styles.envelopeShadowOne} aria-hidden="true" />
+              <div className={styles.envelopeShadowTwo} aria-hidden="true" />
+
               <button
                 type="button"
-                className={styles.sealButton}
+                className={styles.mainEnvelope}
                 onClick={openRandomLetter}
                 disabled={unseenLetters.length === 0}
                 aria-label={
                   unseenLetters.length === 0
-                    ? "No unopened letters"
-                    : "Open a random letter"
+                    ? "All letters opened"
+                    : "Open a random sealed letter"
                 }
               >
-                <img src={SEAL_URL} alt="Wax seal" className={styles.sealImage} />
+                <span className={styles.envelopeFlap} aria-hidden="true" />
+                <span className={styles.envelopeSeal}>Open</span>
+                <span className={styles.envelopeAddress}>for my love</span>
               </button>
-
-              <h1 className={styles.coverTitle}>
-                In Case You
-                <br />
-                Forget
-              </h1>
             </div>
-          </div>
 
-          {unseenLetters.length === 0 && (
-            <p className={styles.coverNote}>
-              Every letter has been opened. Use Archive to revisit them.
+            <h2 className={styles.deskTitle}>A sealed memory waits for you</h2>
+
+            <p className={styles.deskNote}>
+              {unseenLetters.length === 0
+                ? "Every letter has been opened. Visit the archive to read them again."
+                : `${unseenLetters.length} sealed letters remain.`}
             </p>
-          )}
-        </section>
-      )}
+          </section>
+        )}
 
-      {!loading && !error && letters.length > 0 && !showArchive && currentLetter && (
-        <section
-          className={`${styles.openedScreen} ${
-            isUncrumpling ? styles.openedUncrumple : ""
-          }`}
-        >
-          <article className={styles.openedContainer}>
-            <img
-              src={PAPER_TEXTURE_URL}
-              alt="Parchment background"
-              className={styles.openedTexture}
-            />
+        {!loading && !error && letters.length > 0 && !showArchive && currentLetter && (
+          <section
+            className={`${styles.letterScene} ${isUnfurling ? styles.unfurling : ""}`}
+          >
+            <article className={styles.parchment}>
+              <div className={styles.burnEdgeTop} aria-hidden="true" />
 
-            <div className={styles.openedTagBadge}>
-              <span>{currentLetter.tag}</span>
-            </div>
+              <div className={styles.letterMeta}>
+                <span className={styles.letterTag}>{currentLetter.tag}</span>
 
-            <div className={styles.openedNumber}>{currentLetter.number}</div>
-
-            <button
-              type="button"
-              className={styles.openedCassette}
-              onClick={() => toggleAudio(currentLetter)}
-              disabled={!currentLetter.audio}
-              aria-label={
-                activeAudioId === currentLetter.id ? "Stop audio" : "Play audio"
-              }
-            >
-              <img src={CASSETTE_URL} alt="Cassette" />
-            </button>
-
-            <div className={styles.openedContent}>
-              <p>{currentLetter.text}</p>
-
-              <div className={styles.openedFooterIcons}>
                 <button
                   type="button"
-                  className={styles.iconImageButton}
+                  className={styles.cassetteButton}
+                  onClick={() => toggleAudio(currentLetter)}
+                  aria-label={
+                    activeAudioId === currentLetter.id ? "Stop audio" : "Play audio"
+                  }
+                  disabled={!currentLetter.audio}
+                >
+                  <CassetteIcon playing={activeAudioId === currentLetter.id} />
+                </button>
+
+                <span className={styles.letterNumber}>{currentLetter.number}</span>
+              </div>
+
+              <p className={styles.letterText}>{currentLetter.text}</p>
+
+              <div className={styles.letterActions}>
+                <button
+                  type="button"
+                  className={`${styles.actionButton} ${
+                    currentStatus === "hearted" ? styles.actionActive : ""
+                  }`}
                   onClick={() => {
                     updateStatus(currentLetter.id, "hearted");
                     closeLetter();
                   }}
-                  aria-label="Heart this note"
+                  aria-label="Mark as loved"
                 >
-                  <img src={HEART_URL} alt="Heart" />
+                  <HeartIcon active={currentStatus === "hearted"} />
                 </button>
 
                 <button
                   type="button"
-                  className={styles.iconImageButton}
+                  className={`${styles.actionButton} ${
+                    currentStatus === "archived" ? styles.actionActive : ""
+                  }`}
                   onClick={() => {
                     updateStatus(currentLetter.id, "archived");
                     closeLetter();
                   }}
-                  aria-label="Archive this note"
+                  aria-label="Archive letter"
                 >
-                  <img src={ENVELOPE_URL} alt="Envelope" />
+                  <EnvelopeIcon active={currentStatus === "archived"} />
                 </button>
               </div>
-            </div>
-          </article>
-        </section>
-      )}
 
-      {!loading && !error && letters.length > 0 && showArchive && (
-        <section className={styles.archiveScreen}>
-          <h2 className={styles.archiveTitle}>Archive Gallery</h2>
+              <div className={styles.burnEdgeBottom} aria-hidden="true" />
+            </article>
 
-          {archiveItems.length === 0 ? (
-            <div className={styles.messageCard}>
-              <p>The archive is empty until the first letter is opened.</p>
-            </div>
-          ) : (
-            <div className={styles.archiveGrid}>
-              {archiveItems.map((letter) => {
-                const letterStatus = actions[letter.id]?.status ?? "read";
+            <button
+              type="button"
+              className={styles.nextLetter}
+              onClick={openRandomLetter}
+              disabled={unseenLetters.length === 0}
+            >
+              {unseenLetters.length === 0 ? "No sealed letters left" : "Unseal another"}
+            </button>
+          </section>
+        )}
 
-                return (
-                  <article key={letter.id} className={styles.archiveCard}>
-                    <div className={styles.archiveCardHead}>
-                      <span className={styles.archiveTag}>{letter.tag}</span>
-                      <span className={styles.archiveNumber}>{letter.number}</span>
-                    </div>
+        {!loading && !error && letters.length > 0 && showArchive && (
+          <section className={styles.archiveScene}>
+            <h2 className={styles.archiveTitle}>Archive Gallery</h2>
 
-                    <p className={styles.archiveText}>{letter.text}</p>
+            {archiveItems.length === 0 ? (
+              <div className={styles.messageCard}>
+                <p>The archive is empty until the first letter is opened.</p>
+              </div>
+            ) : (
+              <div className={styles.archiveGrid}>
+                {archiveItems.map((letter) => {
+                  const letterStatus = actions[letter.id]?.status ?? "read";
 
-                    <div className={styles.archiveCardFoot}>
-                      <span className={`${styles.statusPill} ${statusClass(letterStatus)}`}>
-                        {statusLabel[letterStatus]}
-                      </span>
+                  return (
+                    <article key={letter.id} className={styles.archivePaper}>
+                      <div className={styles.archivePaperMeta}>
+                        <span className={styles.archiveTag}>{letter.tag}</span>
+                        <span className={styles.archiveNumber}>{letter.number}</span>
+                      </div>
 
-                      <button
-                        type="button"
-                        className={styles.archiveAudio}
-                        onClick={() => toggleAudio(letter)}
-                        disabled={!letter.audio}
-                        aria-label={
-                          activeAudioId === letter.id ? "Stop audio" : "Play audio"
-                        }
-                      >
-                        <CassetteIcon active={activeAudioId === letter.id} />
-                      </button>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </section>
-      )}
+                      <p className={styles.archiveText}>{letter.text}</p>
+
+                      <div className={styles.archiveFooter}>
+                        <span className={`${styles.statusPill} ${statusClass(letterStatus)}`}>
+                          {statusLabel[letterStatus]}
+                        </span>
+
+                        <button
+                          type="button"
+                          className={styles.archiveAudio}
+                          onClick={() => toggleAudio(letter)}
+                          disabled={!letter.audio}
+                          aria-label={
+                            activeAudioId === letter.id ? "Stop audio" : "Play audio"
+                          }
+                        >
+                          <CassetteIcon playing={activeAudioId === letter.id} />
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
+      </main>
     </div>
   );
 }
