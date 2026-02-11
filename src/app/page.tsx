@@ -27,23 +27,6 @@ const statusLabel: Record<LetterStatus, string> = {
   archived: "Archived",
 };
 
-function CassetteIcon({ playing }: { playing: boolean }) {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 64 64"
-      className={styles.cassetteIcon}
-      data-playing={playing}
-    >
-      <rect x="8" y="14" width="48" height="36" rx="4" ry="4" />
-      <circle cx="24" cy="32" r="7" />
-      <circle cx="40" cy="32" r="7" />
-      <rect x="20" y="20" width="24" height="6" rx="2" ry="2" />
-      <path d="M18 45h28" />
-    </svg>
-  );
-}
-
 function HeartIcon({ active }: { active: boolean }) {
   return (
     <svg aria-hidden="true" viewBox="0 0 64 64" className={styles.lineIcon}>
@@ -64,7 +47,7 @@ function EnvelopeIcon({ active }: { active: boolean }) {
   );
 }
 
-const statusClass = (status: LetterStatus) => {
+function statusClass(status: LetterStatus) {
   if (status === "hearted") {
     return styles.statusHearted;
   }
@@ -74,7 +57,7 @@ const statusClass = (status: LetterStatus) => {
   }
 
   return styles.statusRead;
-};
+}
 
 export default function Home() {
   const [letters, setLetters] = useState<Letter[]>([]);
@@ -219,6 +202,11 @@ export default function Home() {
     [activeAudioId, stopAudio],
   );
 
+  const closeLetter = useCallback(() => {
+    stopAudio();
+    setCurrentId(null);
+  }, [stopAudio]);
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -343,204 +331,188 @@ export default function Home() {
     }, 800);
   }, [markRead, stopAudio, unseenLetters]);
 
+  const viewClass = showArchive
+    ? styles.pageArchive
+    : currentLetter
+      ? styles.pageLetter
+      : styles.pageCover;
+
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>In Case You Forget</h1>
-        <p className={styles.subtitle}>
-          A pocket of letters, poems, and little reminders written just for you.
-        </p>
+    <div className={`${styles.page} ${viewClass}`}>
+      {!loading && !error && letters.length > 0 && (
+        <button
+          type="button"
+          className={styles.archiveLink}
+          onClick={() => setShowArchive((previous) => !previous)}
+        >
+          {showArchive ? "Back" : "Archive"}
+        </button>
+      )}
 
-        <div className={styles.headerControls}>
-          <button
-            type="button"
-            className={styles.archiveToggle}
-            onClick={() => setShowArchive((previous) => !previous)}
-          >
-            {showArchive
-              ? "Back to Sealed Notes"
-              : `Archive Gallery (${archiveItems.length})`}
-          </button>
+      {loading && (
+        <section className={styles.messageCard}>
+          <p>Gathering letters from your sheet...</p>
+        </section>
+      )}
 
-          {!showArchive && (
-            <p className={styles.remainingText}>{unseenLetters.length} sealed</p>
-          )}
-        </div>
-      </header>
+      {!loading && error && (
+        <section className={styles.messageCard}>
+          <h2>Could not load the letters</h2>
+          <p>{error}</p>
+          <p>
+            Ensure the Google Sheet is shareable for anyone with the link and
+            includes columns named <strong>#</strong>, <strong>Tag</strong>,
+            <strong> Text</strong>, and <strong>Audio</strong>.
+          </p>
+        </section>
+      )}
 
-      <main className={styles.main}>
-        {loading && (
-          <section className={styles.messageCard}>
-            <p>Gathering letters from your sheet...</p>
-          </section>
-        )}
+      {!loading && !error && letters.length === 0 && (
+        <section className={styles.messageCard}>
+          <p>No entries were found in the sheet yet.</p>
+        </section>
+      )}
 
-        {!loading && error && (
-          <section className={styles.messageCard}>
-            <h2>Could not load the letters</h2>
-            <p>{error}</p>
-            <p>
-              Ensure the Google Sheet is shareable for anyone with the link and
-              includes columns named <strong>#</strong>, <strong>Tag</strong>,
-              <strong> Text</strong>, and <strong>Audio</strong>.
+      {!loading && !error && letters.length > 0 && !showArchive && !currentLetter && (
+        <section className={styles.coverScene}>
+          <div className={styles.coverPaper}>
+            <button
+              type="button"
+              className={styles.coverSeal}
+              onClick={openRandomLetter}
+              disabled={unseenLetters.length === 0}
+              aria-label={unseenLetters.length === 0 ? "No notes left" : "Open"}
+            />
+            <h1 className={styles.coverTitle}>In Case You Forget</h1>
+          </div>
+
+          {unseenLetters.length === 0 ? (
+            <p className={styles.sceneNote}>
+              Every letter has been opened. Use Archive to revisit them.
             </p>
-          </section>
-        )}
+          ) : (
+            <p className={styles.sceneNote}>{unseenLetters.length} sealed letters</p>
+          )}
+        </section>
+      )}
 
-        {!loading && !error && letters.length === 0 && (
-          <section className={styles.messageCard}>
-            <p>No entries were found in the sheet yet.</p>
-          </section>
-        )}
-
-        {!loading && !error && letters.length > 0 && !showArchive && (
-          <section className={styles.letterStage}>
-            <article
-              className={`${styles.paper} ${
-                currentLetter ? styles.paperOpen : styles.paperClosed
-              } ${isUncrumpling ? styles.uncrumple : ""}`}
-            >
-              {currentLetter ? (
-                <>
-                  <div className={styles.paperTop}>
-                    <span className={styles.tag}>{currentLetter.tag}</span>
-
-                    <button
-                      type="button"
-                      className={styles.cassetteButton}
-                      onClick={() => toggleAudio(currentLetter)}
-                      aria-label={
-                        activeAudioId === currentLetter.id
-                          ? "Stop audio"
-                          : "Play audio"
-                      }
-                      disabled={!currentLetter.audio}
-                      title={
-                        currentLetter.audio
-                          ? "Play audio"
-                          : "No audio link for this note"
-                      }
-                    >
-                      <CassetteIcon playing={activeAudioId === currentLetter.id} />
-                    </button>
-
-                    <span className={styles.number}>{currentLetter.number}</span>
-                  </div>
-
-                  <p className={styles.letterText}>{currentLetter.text}</p>
-
-                  <div className={styles.paperBottom}>
-                    <button
-                      type="button"
-                      className={`${styles.actionButton} ${
-                        currentStatus === "hearted" ? styles.activeHeart : ""
-                      }`}
-                      onClick={() => updateStatus(currentLetter.id, "hearted")}
-                      aria-label="Heart this note"
-                    >
-                      <HeartIcon active={currentStatus === "hearted"} />
-                      <span>Heart</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={`${styles.actionButton} ${
-                        currentStatus === "archived" ? styles.activeArchive : ""
-                      }`}
-                      onClick={() => updateStatus(currentLetter.id, "archived")}
-                      aria-label="Archive this note"
-                    >
-                      <EnvelopeIcon active={currentStatus === "archived"} />
-                      <span>Archive</span>
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <div className={styles.placeholder}>
-                  <p>
-                    A sealed memory is waiting.
-                    <br />
-                    Press the wax seal to reveal a random letter.
-                  </p>
-                </div>
-              )}
-            </article>
+      {!loading && !error && letters.length > 0 && !showArchive && currentLetter && (
+        <section
+          className={`${styles.letterScene} ${isUncrumpling ? styles.uncrumple : ""}`}
+        >
+          <div className={styles.letterBoard}>
+            <div className={styles.tagPin}>
+              <span>{currentLetter.tag}</span>
+            </div>
 
             <button
               type="button"
-              className={styles.waxSeal}
-              onClick={openRandomLetter}
-              disabled={unseenLetters.length === 0}
+              className={styles.cassetteCard}
+              onClick={() => toggleAudio(currentLetter)}
+              aria-label={
+                activeAudioId === currentLetter.id ? "Stop audio" : "Play audio"
+              }
+              disabled={!currentLetter.audio}
+              data-playing={activeAudioId === currentLetter.id}
             >
-              <span className={styles.waxText}>
-                {unseenLetters.length === 0 ? "Done" : "Open"}
-              </span>
+              <span className={styles.cassetteGlyph} aria-hidden="true" />
             </button>
 
-            {unseenLetters.length === 0 && (
-              <p className={styles.completedText}>
-                Every note has been opened. Revisit them in the Archive Gallery.
-              </p>
-            )}
-          </section>
-        )}
+            <span className={styles.letterNumber}>{currentLetter.number}</span>
 
-        {!loading && !error && letters.length > 0 && showArchive && (
-          <section className={styles.archiveStage}>
-            {archiveItems.length === 0 ? (
-              <div className={styles.messageCard}>
-                <p>The archive is empty until the first letter is opened.</p>
+            <article className={styles.parchment}>
+              <p className={styles.letterText}>{currentLetter.text}</p>
+
+              <div className={styles.letterActions}>
+                <button
+                  type="button"
+                  className={`${styles.iconAction} ${
+                    currentStatus === "hearted" ? styles.iconActionActive : ""
+                  }`}
+                  onClick={() => {
+                    updateStatus(currentLetter.id, "hearted");
+                    closeLetter();
+                  }}
+                  aria-label="Heart this note"
+                >
+                  <HeartIcon active={currentStatus === "hearted"} />
+                </button>
+
+                <button
+                  type="button"
+                  className={`${styles.iconAction} ${
+                    currentStatus === "archived" ? styles.iconActionActive : ""
+                  }`}
+                  onClick={() => {
+                    updateStatus(currentLetter.id, "archived");
+                    closeLetter();
+                  }}
+                  aria-label="Archive this note"
+                >
+                  <EnvelopeIcon active={currentStatus === "archived"} />
+                </button>
               </div>
-            ) : (
-              <div className={styles.archiveGrid}>
-                {archiveItems.map((letter) => {
-                  const letterStatus = actions[letter.id]?.status ?? "read";
+            </article>
+          </div>
 
-                  return (
-                    <article key={letter.id} className={styles.archiveCard}>
-                      <div className={styles.archiveTop}>
-                        <span className={styles.tag}>{letter.tag}</span>
-                        <span className={styles.number}>{letter.number}</span>
-                      </div>
+          <button
+            type="button"
+            className={styles.openNext}
+            onClick={openRandomLetter}
+            disabled={unseenLetters.length === 0}
+          >
+            {unseenLetters.length === 0 ? "No sealed notes left" : "Open next seal"}
+          </button>
+        </section>
+      )}
 
-                      <p className={styles.archiveText}>{letter.text}</p>
+      {!loading && !error && letters.length > 0 && showArchive && (
+        <section className={styles.archiveScene}>
+          <h2 className={styles.archiveTitle}>Archive Gallery</h2>
 
-                      <div className={styles.archiveBottom}>
-                        <span
-                          className={`${styles.statusPill} ${statusClass(
-                            letterStatus,
-                          )}`}
-                        >
-                          {statusLabel[letterStatus]}
-                        </span>
+          {archiveItems.length === 0 ? (
+            <div className={styles.messageCard}>
+              <p>The archive is empty until the first letter is opened.</p>
+            </div>
+          ) : (
+            <div className={styles.archiveGrid}>
+              {archiveItems.map((letter) => {
+                const letterStatus = actions[letter.id]?.status ?? "read";
 
-                        <button
-                          type="button"
-                          className={styles.cassetteButton}
-                          onClick={() => toggleAudio(letter)}
-                          aria-label={
-                            activeAudioId === letter.id
-                              ? "Stop audio"
-                              : "Play audio"
-                          }
-                          disabled={!letter.audio}
-                          title={
-                            letter.audio
-                              ? "Play audio"
-                              : "No audio link for this note"
-                          }
-                        >
-                          <CassetteIcon playing={activeAudioId === letter.id} />
-                        </button>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-        )}
-      </main>
+                return (
+                  <article key={letter.id} className={styles.archiveCard}>
+                    <div className={styles.archiveHead}>
+                      <span className={styles.archiveTag}>{letter.tag}</span>
+                      <span className={styles.archiveNumber}>{letter.number}</span>
+                    </div>
+
+                    <p className={styles.archiveText}>{letter.text}</p>
+
+                    <div className={styles.archiveFoot}>
+                      <span className={`${styles.statusPill} ${statusClass(letterStatus)}`}>
+                        {statusLabel[letterStatus]}
+                      </span>
+
+                      <button
+                        type="button"
+                        className={styles.archiveAudio}
+                        onClick={() => toggleAudio(letter)}
+                        aria-label={
+                          activeAudioId === letter.id ? "Stop audio" : "Play audio"
+                        }
+                        disabled={!letter.audio}
+                        data-playing={activeAudioId === letter.id}
+                      >
+                        <span className={styles.cassetteGlyph} aria-hidden="true" />
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }
