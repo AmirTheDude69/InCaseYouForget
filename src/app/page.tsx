@@ -42,6 +42,15 @@ function SearchIcon() {
   );
 }
 
+function ReturnIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={styles.returnIcon}>
+      <path d="M9 7L4 12L9 17" />
+      <path d="M5 12H14C18 12 20 9 20 5" />
+    </svg>
+  );
+}
+
 function TapeIcon({
   playing,
   small = false,
@@ -457,14 +466,15 @@ export default function HomePage() {
       <div className={styles.archivePage}>
         <button
           type="button"
-          className={styles.topBackLink}
+          className={styles.topBackIconButton}
           onClick={() => {
             stopAudio();
             setShowArchive(false);
             setCurrentId(null);
           }}
+          aria-label="Go back"
         >
-          Back
+          <ReturnIcon />
         </button>
 
         <div className={styles.archiveParchment}>
@@ -533,7 +543,7 @@ export default function HomePage() {
                         className={styles.readButton}
                         onClick={() => openLetterById(letter.id)}
                       >
-                        Read
+                        Open
                       </button>
 
                       <div className={styles.noteActionGroup}>
