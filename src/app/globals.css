@@ -1,4 +1,18 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Dancing+Script:wght@400;700&family=Pinyon+Script&display=swap");
+@font-face {
+  font-family: "Handstand";
+  src: url("/fonts/Handstand.otf") format("opentype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Handstand Underlines";
+  src: url("/fonts/Handstand Underlines.otf") format("opentype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
 
 * {
   box-sizing: border-box;
@@ -12,13 +26,22 @@ body {
 }
 
 body {
-  font-family: "Cormorant Garamond", "Times New Roman", serif;
+  background: #c4b5a0;
+  color: #4a3728;
+  font-family: "Handstand", "Times New Roman", serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
 button,
 input,
+select,
 textarea {
   font: inherit;
+  color: inherit;
 }

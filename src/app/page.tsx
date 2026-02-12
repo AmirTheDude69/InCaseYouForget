@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import ScratchCard from "@/components/ScratchCard";
 import styles from "./page.module.css";
 
 type Letter = {
@@ -20,113 +19,104 @@ type LetterState = {
   updatedAt: number;
 };
 
-const STORAGE_KEY = "in-case-you-forget-actions-v1";
-const SCRATCH_REVEAL_IMAGE = `data:image/svg+xml,${encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380">
-    <defs>
-      <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#f5e6cc"/>
-        <stop offset="55%" stop-color="#e0bf92"/>
-        <stop offset="100%" stop-color="#c49669"/>
-      </linearGradient>
-      <radialGradient id="wax" cx="35%" cy="28%" r="70%">
-        <stop offset="0%" stop-color="#de7e7a"/>
-        <stop offset="62%" stop-color="#982438"/>
-        <stop offset="100%" stop-color="#711829"/>
-      </radialGradient>
-    </defs>
-    <rect width="600" height="380" fill="url(#paper)"/>
-    <g opacity="0.2" fill="#8a653f">
-      <circle cx="48" cy="56" r="2.2"/><circle cx="98" cy="196" r="1.8"/><circle cx="181" cy="74" r="2.1"/>
-      <circle cx="292" cy="143" r="1.6"/><circle cx="354" cy="62" r="2.3"/><circle cx="417" cy="184" r="1.9"/>
-      <circle cx="521" cy="102" r="2.1"/><circle cx="563" cy="246" r="1.8"/><circle cx="87" cy="304" r="2"/>
-      <circle cx="228" cy="286" r="2.3"/><circle cx="398" cy="312" r="1.7"/><circle cx="531" cy="318" r="2"/>
-    </g>
-    <circle cx="300" cy="170" r="72" fill="url(#wax)"/>
-    <circle cx="300" cy="170" r="58" fill="none" stroke="#f2b5b4" stroke-opacity="0.35" stroke-width="2"/>
-    <text x="300" y="180" text-anchor="middle" fill="#f8d0ca" font-family="serif" font-size="26" font-style="italic">open me</text>
-    <text x="300" y="295" text-anchor="middle" fill="#6f1f2b" font-family="serif" font-size="34" font-style="italic">A letter waits below</text>
-  </svg>`,
-)}`;
+type ArchiveFilter = "All" | "Favorites" | string;
+type SortOrder = "Newest First" | "Oldest First";
 
-const statusLabel: Record<LetterStatus, string> = {
-  read: "Read",
-  hearted: "Loved",
-  archived: "Archived",
+const STORAGE_KEY = "in-case-you-forget-actions-v1";
+
+const toPreview = (text: string, maxLength = 190) => {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
+  return `${normalized.slice(0, maxLength).trimEnd()}...`;
 };
 
-function CassetteIcon({ playing }: { playing: boolean }) {
+function SearchIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={styles.searchIcon}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.5-3.5" />
+    </svg>
+  );
+}
+
+function TapeIcon({
+  playing,
+  small = false,
+}: {
+  playing: boolean;
+  small?: boolean;
+}) {
   return (
     <svg
+      viewBox="0 0 48 48"
       aria-hidden="true"
-      viewBox="0 0 64 64"
-      className={styles.iconCassette}
+      className={`${styles.tapeIcon} ${small ? styles.tapeIconSmall : ""}`.trim()}
       data-playing={playing}
     >
-      <rect x="8" y="14" width="48" height="36" rx="5" ry="5" />
-      <circle cx="23" cy="32" r="7" />
-      <circle cx="41" cy="32" r="7" />
-      <path d="M16 22h32" />
-      <path d="M16 44h32" />
-      <path d="M28 32h8" />
+      <rect x="6" y="12" width="36" height="24" rx="2" />
+      <circle cx="16" cy="24" r="5" />
+      <circle cx="32" cy="24" r="5" />
+      <path d="M16 29h16" />
+      <rect x="20" y="22" width="8" height="4" />
+      <line x1="10" y1="16" x2="14" y2="16" />
+      <line x1="10" y1="20" x2="12" y2="20" />
     </svg>
   );
 }
 
-function HeartIcon({ active }: { active: boolean }) {
+function HeartIcon({
+  active,
+  small = false,
+}: {
+  active: boolean;
+  small?: boolean;
+}) {
   return (
     <svg
+      viewBox="0 0 40 40"
       aria-hidden="true"
-      viewBox="0 0 64 64"
-      className={styles.iconSketch}
+      className={`${styles.heartIcon} ${small ? styles.heartIconSmall : ""}`.trim()}
       data-active={active}
     >
-      <path d="M32 53C27 47 10 37 10 22c0-6 5-11 11-11 5 0 9 3 11 7 2-4 6-7 11-7 6 0 11 5 11 11 0 15-17 25-22 31z" />
-      <path d="M20 18c2-2 4-3 6-3" />
+      <path d="M20 35C18 33 4 24 4 15C4 8 8 6 12 8C15 9 18 12 20 15C22 12 25 9 28 8C32 6 36 8 36 15C36 24 22 33 20 35Z" />
     </svg>
   );
 }
 
-function EnvelopeIcon({ active }: { active: boolean }) {
+function EnvelopeIcon({ small = false }: { small?: boolean }) {
   return (
     <svg
+      viewBox="0 0 44 44"
       aria-hidden="true"
-      viewBox="0 0 64 64"
-      className={styles.iconSketch}
-      data-active={active}
+      className={`${styles.envelopeIcon} ${small ? styles.envelopeIconSmall : ""}`.trim()}
     >
-      <rect x="10" y="17" width="44" height="30" rx="4" ry="4" />
-      <path d="M10 21l22 17 22-17" />
-      <path d="M10 47l16-14" />
-      <path d="M54 47L38 33" />
+      <path d="M6 12L22 24L38 12" />
+      <rect x="6" y="12" width="32" height="22" rx="1" />
+      <path d="M6 34L18 23" />
+      <path d="M38 34L26 23" />
     </svg>
   );
 }
 
-const statusClass = (status: LetterStatus) => {
-  if (status === "hearted") {
-    return styles.statusLoved;
-  }
-
-  if (status === "archived") {
-    return styles.statusArchived;
-  }
-
-  return styles.statusRead;
-};
-
-export default function Home() {
+export default function HomePage() {
   const [letters, setLetters] = useState<Letter[]>([]);
   const [actions, setActions] = useState<Record<string, LetterState>>({});
   const [currentId, setCurrentId] = useState<string | null>(null);
+  const [showArchive, setShowArchive] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isUnfurling, setIsUnfurling] = useState(false);
-  const [showArchive, setShowArchive] = useState(false);
   const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
+  const [isRevealing, setIsRevealing] = useState(false);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterTag, setFilterTag] = useState<ArchiveFilter>("All");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("Newest First");
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const unfurlTimerRef = useRef<number | null>(null);
+  const revealTimerRef = useRef<number | null>(null);
 
   const setAndPersistActions = useCallback(
     (
@@ -141,7 +131,7 @@ export default function Home() {
           try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
           } catch {
-            // Ignore write failures in private browsing contexts.
+            // Ignore storage errors in private browsing mode.
           }
         }
 
@@ -209,6 +199,28 @@ export default function Home() {
     [setAndPersistActions],
   );
 
+  const triggerRevealAnimation = useCallback(() => {
+    setIsRevealing(true);
+
+    if (revealTimerRef.current) {
+      window.clearTimeout(revealTimerRef.current);
+    }
+
+    revealTimerRef.current = window.setTimeout(() => {
+      setIsRevealing(false);
+    }, 700);
+  }, []);
+
+  const openLetterById = useCallback(
+    (letterId: string) => {
+      stopAudio();
+      setCurrentId(letterId);
+      setShowArchive(false);
+      triggerRevealAnimation();
+    },
+    [stopAudio, triggerRevealAnimation],
+  );
+
   const toggleAudio = useCallback(
     (letter: Letter) => {
       if (!letter.audio) {
@@ -227,6 +239,7 @@ export default function Home() {
       }
 
       const nextPlayer = new Audio(letter.audio);
+      nextPlayer.preload = "auto";
 
       nextPlayer.onended = () => {
         if (audioRef.current === nextPlayer) {
@@ -257,11 +270,6 @@ export default function Home() {
     },
     [activeAudioId, stopAudio],
   );
-
-  const closeLetter = useCallback(() => {
-    stopAudio();
-    setCurrentId(null);
-  }, [stopAudio]);
 
   useEffect(() => {
     try {
@@ -330,30 +338,67 @@ export default function Home() {
 
   useEffect(() => {
     return () => {
-      if (unfurlTimerRef.current) {
-        window.clearTimeout(unfurlTimerRef.current);
+      if (revealTimerRef.current) {
+        window.clearTimeout(revealTimerRef.current);
       }
 
       stopAudio();
     };
   }, [stopAudio]);
 
-  const unseenLetters = useMemo(
+  const unreadLetters = useMemo(
     () => letters.filter((letter) => !actions[letter.id]),
     [actions, letters],
   );
 
   const archiveItems = useMemo(
-    () =>
-      letters
-        .filter((letter) => Boolean(actions[letter.id]))
-        .sort(
-          (first, second) =>
-            (actions[second.id]?.updatedAt ?? 0) -
-            (actions[first.id]?.updatedAt ?? 0),
-        ),
+    () => letters.filter((letter) => Boolean(actions[letter.id])),
     [actions, letters],
   );
+
+  const availableTags = useMemo(() => {
+    const tags = new Set<string>();
+
+    archiveItems.forEach((letter) => {
+      if (letter.tag.trim()) {
+        tags.add(letter.tag.trim());
+      }
+    });
+
+    return Array.from(tags).sort((first, second) => first.localeCompare(second));
+  }, [archiveItems]);
+
+  const filteredArchiveItems = useMemo(() => {
+    let filtered = [...archiveItems];
+
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    if (normalizedQuery) {
+      filtered = filtered.filter((letter) =>
+        letter.text.toLowerCase().includes(normalizedQuery),
+      );
+    }
+
+    if (filterTag === "Favorites") {
+      filtered = filtered.filter((letter) => actions[letter.id]?.status === "hearted");
+    } else if (filterTag !== "All") {
+      filtered = filtered.filter(
+        (letter) => letter.tag.toLowerCase() === filterTag.toLowerCase(),
+      );
+    }
+
+    filtered.sort((first, second) => {
+      const firstUpdated = actions[first.id]?.updatedAt ?? 0;
+      const secondUpdated = actions[second.id]?.updatedAt ?? 0;
+
+      if (sortOrder === "Newest First") {
+        return secondUpdated - firstUpdated;
+      }
+
+      return firstUpdated - secondUpdated;
+    });
+
+    return filtered;
+  }, [actions, archiveItems, filterTag, searchQuery, sortOrder]);
 
   const currentLetter = useMemo(
     () => letters.find((letter) => letter.id === currentId) ?? null,
@@ -362,235 +407,291 @@ export default function Home() {
 
   const currentStatus = currentLetter
     ? actions[currentLetter.id]?.status ?? "read"
-    : null;
+    : "read";
 
-  const openRandomLetter = useCallback(() => {
-    if (unseenLetters.length === 0) {
+  const openRandomUnread = useCallback(() => {
+    if (unreadLetters.length === 0) {
       return;
     }
 
-    stopAudio();
+    const selected = unreadLetters[Math.floor(Math.random() * unreadLetters.length)];
 
-    const selected = unseenLetters[Math.floor(Math.random() * unseenLetters.length)];
-
-    setCurrentId(selected.id);
     markRead(selected.id);
-    setShowArchive(false);
-    setIsUnfurling(true);
+    openLetterById(selected.id);
+  }, [markRead, openLetterById, unreadLetters]);
 
-    if (unfurlTimerRef.current) {
-      window.clearTimeout(unfurlTimerRef.current);
-    }
+  if (loading) {
+    return (
+      <div className={styles.pageState}>
+        <div className={styles.messagePanel}>Gathering your letters from the sheet...</div>
+      </div>
+    );
+  }
 
-    unfurlTimerRef.current = window.setTimeout(() => {
-      setIsUnfurling(false);
-    }, 900);
-  }, [markRead, stopAudio, unseenLetters]);
+  if (error) {
+    return (
+      <div className={styles.pageState}>
+        <div className={styles.messagePanel}>
+          <h2>Could not load the letters</h2>
+          <p>{error}</p>
+          <p>
+            Confirm your Google Sheet is public and has columns named <strong>#</strong>,{" "}
+            <strong>Tag</strong>, <strong>Text</strong>, and <strong>Audio</strong>.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  const onTopAction = () => {
-    stopAudio();
+  if (letters.length === 0) {
+    return (
+      <div className={styles.pageState}>
+        <div className={styles.messagePanel}>No entries were found in the sheet yet.</div>
+      </div>
+    );
+  }
 
-    if (showArchive) {
-      setShowArchive(false);
-      return;
-    }
+  if (showArchive) {
+    return (
+      <div className={styles.archivePage}>
+        <button
+          type="button"
+          className={styles.cornerLink}
+          onClick={() => {
+            stopAudio();
+            setShowArchive(false);
+            setCurrentId(null);
+          }}
+        >
+          Back
+        </button>
 
-    setCurrentId(null);
-    setShowArchive(true);
-  };
+        <div className={styles.archiveParchment}>
+          <h1 className={styles.archiveHeading}>Archive Gallery</h1>
 
-  return (
-    <div className={styles.page}>
-      <div className={styles.grain} aria-hidden="true" />
+          <div className={styles.archiveControls}>
+            <label className={styles.searchWrap}>
+              <input
+                type="text"
+                placeholder="Type..."
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className={styles.searchInput}
+              />
+              <SearchIcon />
+            </label>
 
-      <header className={styles.header}>
-        <h1 className={styles.headerTitle}>In Case You Forget</h1>
+            <label className={styles.selectWrap}>
+              <span>Filter by Tag:</span>
+              <select
+                value={filterTag}
+                onChange={(event) => setFilterTag(event.target.value)}
+                className={styles.selectInput}
+              >
+                <option value="All">All</option>
+                <option value="Favorites">Favorites</option>
+                {availableTags.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-        {!loading && !error && letters.length > 0 && (
-          <button type="button" className={styles.headerLink} onClick={onTopAction}>
-            {showArchive ? "Back to Desk" : "Archive"}
-          </button>
-        )}
-      </header>
+            <label className={styles.selectWrap}>
+              <span>Sort:</span>
+              <select
+                value={sortOrder}
+                onChange={(event) => setSortOrder(event.target.value as SortOrder)}
+                className={styles.selectInput}
+              >
+                <option value="Newest First">Newest First</option>
+                <option value="Oldest First">Oldest First</option>
+              </select>
+            </label>
+          </div>
 
-      <main className={styles.main}>
-        {loading && (
-          <section className={styles.messageCard}>
-            <p>Gathering your letters from the sheet...</p>
-          </section>
-        )}
+          {filteredArchiveItems.length === 0 ? (
+            <div className={styles.emptyArchive}>No matching letters in the archive.</div>
+          ) : (
+            <div className={styles.cardsGrid}>
+              {filteredArchiveItems.map((letter) => {
+                const isFavorite = actions[letter.id]?.status === "hearted";
+                const isPlaying = activeAudioId === letter.id;
 
-        {!loading && error && (
-          <section className={styles.messageCard}>
-            <h2>Could not load the letters</h2>
-            <p>{error}</p>
-            <p>
-              Ensure the Google Sheet is shared for anyone with the link and has
-              columns named <strong>#</strong>, <strong>Tag</strong>,
-              <strong> Text</strong>, and <strong>Audio</strong>.
-            </p>
-          </section>
-        )}
+                return (
+                  <article key={letter.id} className={styles.noteCard}>
+                    <header className={styles.noteCardHeader}>
+                      <span className={styles.noteTagPill}>{letter.tag}</span>
+                      <span className={styles.noteNumberMark}>{letter.number}</span>
+                    </header>
 
-        {!loading && !error && letters.length === 0 && (
-          <section className={styles.messageCard}>
-            <p>No entries were found in the sheet yet.</p>
-          </section>
-        )}
+                    <p className={styles.notePreview}>{toPreview(letter.text)}</p>
 
-        {!loading && !error && letters.length > 0 && !showArchive && !currentLetter && (
-          <section className={styles.scratchScene}>
-            {unseenLetters.length > 0 ? (
-              <>
-                <div className={styles.scratchFrame}>
-                  <div className={styles.scratchGlow} aria-hidden="true" />
-                  <ScratchCard
-                    className={styles.scratchCard}
-                    scratchMode="scratch"
-                    useImage
-                    bottomImage={{ src: SCRATCH_REVEAL_IMAGE, alt: "Hidden letter preview" }}
-                    topLayerColor="#d8bc94"
-                    textColor="#6e1f2b"
-                    topText="Scratch To Unseal"
-                    brushSize={38}
-                    borderRadius={18}
-                    revealThreshold={0.43}
-                    onRevealComplete={openRandomLetter}
-                  />
-                </div>
+                    <div className={styles.noteFooter}>
+                      <button
+                        type="button"
+                        className={styles.readButton}
+                        onClick={() => openLetterById(letter.id)}
+                      >
+                        Read
+                      </button>
 
-                <h2 className={styles.scratchTitle}>Uncover your next love letter</h2>
-                <p className={styles.scratchNote}>{unseenLetters.length} unread letters</p>
-              </>
-            ) : (
-              <div className={styles.emptyDesk}>
-                <h2 className={styles.scratchTitle}>No sealed letters left</h2>
-                <p className={styles.scratchNote}>
-                  Every letter has been opened. Visit the archive to revisit them.
-                </p>
-              </div>
-            )}
-          </section>
-        )}
+                      <div className={styles.noteActionGroup}>
+                        {isFavorite ? <HeartIcon active={true} small /> : null}
+                        <button
+                          type="button"
+                          className={styles.tapeCardButton}
+                          onClick={() => toggleAudio(letter)}
+                          disabled={!letter.audio}
+                          aria-label={isPlaying ? "Stop audio" : "Play audio"}
+                        >
+                          <TapeIcon playing={isPlaying} small />
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
 
-        {!loading && !error && letters.length > 0 && !showArchive && currentLetter && (
-          <section
-            className={`${styles.letterScene} ${isUnfurling ? styles.unfurling : ""}`}
+          <div className={styles.archiveBottomRow}>
+            <button
+              type="button"
+              className={styles.returnButton}
+              onClick={() => {
+                stopAudio();
+                setShowArchive(false);
+                setCurrentId(null);
+              }}
+            >
+              <span aria-hidden="true">↺</span>
+              Return to Open New Notes
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (currentLetter) {
+    return (
+      <div className={styles.letterPage}>
+        <button
+          type="button"
+          className={styles.cornerLink}
+          onClick={() => {
+            stopAudio();
+            setShowArchive(true);
+            setCurrentId(null);
+          }}
+        >
+          Archive
+        </button>
+
+        <div className={`${styles.letterParchment} ${isRevealing ? styles.letterReveal : ""}`}>
+          <button
+            type="button"
+            className={styles.backLink}
+            onClick={() => {
+              stopAudio();
+              setShowArchive(true);
+              setCurrentId(null);
+            }}
           >
-            <article className={styles.parchment}>
-              <div className={styles.burnEdgeTop} aria-hidden="true" />
+            ← Back to Archive
+          </button>
 
-              <div className={styles.letterMeta}>
-                <span className={styles.letterTag}>{currentLetter.tag}</span>
+          <div className={styles.tagWithString}>
+            <span className={styles.tagString} aria-hidden="true" />
+            <span className={styles.tagCard}>{currentLetter.tag}</span>
+          </div>
 
-                <button
-                  type="button"
-                  className={styles.cassetteButton}
-                  onClick={() => toggleAudio(currentLetter)}
-                  aria-label={
-                    activeAudioId === currentLetter.id ? "Stop audio" : "Play audio"
-                  }
-                  disabled={!currentLetter.audio}
-                >
-                  <CassetteIcon playing={activeAudioId === currentLetter.id} />
-                </button>
+          <div className={styles.letterNumber}>{currentLetter.number}</div>
 
-                <span className={styles.letterNumber}>{currentLetter.number}</span>
-              </div>
+          <div className={styles.letterBodyWrap}>
+            <p className={styles.letterBody}>{currentLetter.text}</p>
+          </div>
 
-              <p className={styles.letterText}>{currentLetter.text}</p>
-
-              <div className={styles.letterActions}>
-                <button
-                  type="button"
-                  className={`${styles.actionButton} ${
-                    currentStatus === "hearted" ? styles.actionActive : ""
-                  }`}
-                  onClick={() => {
-                    updateStatus(currentLetter.id, "hearted");
-                    closeLetter();
-                  }}
-                  aria-label="Mark as loved"
-                >
-                  <HeartIcon active={currentStatus === "hearted"} />
-                </button>
-
-                <button
-                  type="button"
-                  className={`${styles.actionButton} ${
-                    currentStatus === "archived" ? styles.actionActive : ""
-                  }`}
-                  onClick={() => {
-                    updateStatus(currentLetter.id, "archived");
-                    closeLetter();
-                  }}
-                  aria-label="Archive letter"
-                >
-                  <EnvelopeIcon active={currentStatus === "archived"} />
-                </button>
-              </div>
-
-              <div className={styles.burnEdgeBottom} aria-hidden="true" />
-            </article>
+          <div className={styles.letterBottomIcons}>
+            <button
+              type="button"
+              className={styles.iconButton}
+              onClick={() => toggleAudio(currentLetter)}
+              disabled={!currentLetter.audio}
+              aria-label={activeAudioId === currentLetter.id ? "Stop audio" : "Play audio"}
+            >
+              <TapeIcon playing={activeAudioId === currentLetter.id} />
+            </button>
 
             <button
               type="button"
-              className={styles.nextLetter}
-              onClick={openRandomLetter}
-              disabled={unseenLetters.length === 0}
+              className={styles.iconButton}
+              onClick={() => updateStatus(currentLetter.id, "hearted")}
+              aria-label="Mark as favorite"
             >
-              {unseenLetters.length === 0 ? "No sealed letters left" : "Unseal another"}
+              <HeartIcon active={currentStatus === "hearted"} />
             </button>
-          </section>
-        )}
 
-        {!loading && !error && letters.length > 0 && showArchive && (
-          <section className={styles.archiveScene}>
-            <h2 className={styles.archiveTitle}>Archive Gallery</h2>
+            <button
+              type="button"
+              className={styles.iconButton}
+              onClick={() => {
+                updateStatus(currentLetter.id, "archived");
+                stopAudio();
+                setShowArchive(true);
+                setCurrentId(null);
+              }}
+              aria-label="Archive this note"
+            >
+              <EnvelopeIcon />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-            {archiveItems.length === 0 ? (
-              <div className={styles.messageCard}>
-                <p>The archive is empty until the first letter is opened.</p>
-              </div>
-            ) : (
-              <div className={styles.archiveGrid}>
-                {archiveItems.map((letter) => {
-                  const letterStatus = actions[letter.id]?.status ?? "read";
+  return (
+    <div className={styles.homePage}>
+      <button
+        type="button"
+        className={styles.cornerLink}
+        onClick={() => {
+          stopAudio();
+          setShowArchive(true);
+          setCurrentId(null);
+        }}
+      >
+        Archive
+      </button>
 
-                  return (
-                    <article key={letter.id} className={styles.archivePaper}>
-                      <div className={styles.archivePaperMeta}>
-                        <span className={styles.archiveTag}>{letter.tag}</span>
-                        <span className={styles.archiveNumber}>{letter.number}</span>
-                      </div>
+      <div className={styles.homeSheet}>
+        <div className={styles.sealPlate}>
+          <button
+            type="button"
+            className={styles.waxSealButton}
+            onClick={openRandomUnread}
+            disabled={unreadLetters.length === 0}
+            aria-label={
+              unreadLetters.length === 0 ? "No unread letters left" : "Open unread letter"
+            }
+          >
+            <span className={styles.waxSealLetter}>F</span>
+          </button>
+        </div>
 
-                      <p className={styles.archiveText}>{letter.text}</p>
+        <h1 className={styles.homeHeading}>In Case You Forget</h1>
+      </div>
 
-                      <div className={styles.archiveFooter}>
-                        <span className={`${styles.statusPill} ${statusClass(letterStatus)}`}>
-                          {statusLabel[letterStatus]}
-                        </span>
-
-                        <button
-                          type="button"
-                          className={styles.archiveAudio}
-                          onClick={() => toggleAudio(letter)}
-                          disabled={!letter.audio}
-                          aria-label={
-                            activeAudioId === letter.id ? "Stop audio" : "Play audio"
-                          }
-                        >
-                          <CassetteIcon playing={activeAudioId === letter.id} />
-                        </button>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-        )}
-      </main>
+      <p className={styles.homeSubtext}>
+        {unreadLetters.length === 0
+          ? "Every letter has been opened. Use Archive to revisit them."
+          : `${unreadLetters.length} unread letter${
+              unreadLetters.length === 1 ? "" : "s"
+            } waiting.`}
+      </p>
     </div>
   );
 }
