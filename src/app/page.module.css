@@ -137,14 +137,8 @@
 .waxSealButton {
   width: 138px;
   height: 138px;
-  border-radius: 999px;
   border: none;
-  background: radial-gradient(circle at 35% 35%, #ee9990 0%, #df7368 38%, #c7554d 66%, #a53730 100%);
-  box-shadow:
-    0 12px 22px rgba(126, 33, 29, 0.45),
-    inset 0 -6px 14px rgba(0, 0, 0, 0.45),
-    inset 0 5px 10px rgba(255, 255, 255, 0.2),
-    inset -10px -9px 20px rgba(0, 0, 0, 0.24);
+  background: transparent;
   cursor: pointer;
   transition: transform 150ms ease, box-shadow 150ms ease;
 }
@@ -163,14 +157,12 @@
   transform: none;
 }
 
-.waxSealLetter {
-  display: grid;
-  place-items: center;
+.homeWaxHeart {
   width: 100%;
   height: 100%;
-  color: rgba(97, 39, 39, 0.42);
-  font-size: 5.1rem;
-  line-height: 1;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 18px rgba(124, 31, 35, 0.42));
 }
 
 .homeHeading {
@@ -770,34 +762,24 @@
   height: 1.45rem;
 }
 
-.heartWax {
-  width: 2.65rem;
-  height: 2.65rem;
-  object-fit: contain;
-  display: block;
-  filter: drop-shadow(0 3px 5px rgba(80, 18, 23, 0.28));
+.heartIcon {
+  width: 2.55rem;
+  height: 2.55rem;
+  fill: none;
+  stroke: #9b8570;
+  stroke-width: 1.5;
+  opacity: 0.4;
 }
 
-.heartWaxActive {
+.heartIcon[data-active="true"] {
+  fill: #a83232;
+  stroke: #8b2828;
   opacity: 1;
 }
 
-.heartWaxInactive {
-  opacity: 0.32;
-  filter: grayscale(0.35) saturate(0.7) drop-shadow(0 2px 3px rgba(80, 18, 23, 0.2));
-}
-
-.heartWaxSmall {
-  width: 1.55rem;
-  height: 1.55rem;
-}
-
-.heartWaxButton {
-  opacity: 1;
-}
-
-.heartWaxButton:hover {
-  opacity: 1;
+.heartIconSmall {
+  width: 1.35rem;
+  height: 1.35rem;
 }
 
 .envelopeIcon {
@@ -892,10 +874,6 @@
   .waxSealButton {
     width: 102px;
     height: 102px;
-  }
-
-  .waxSealLetter {
-    font-size: 3.8rem;
   }
 
   .homeHeading {
