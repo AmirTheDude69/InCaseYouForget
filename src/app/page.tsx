@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./page.module.css";
 
@@ -66,7 +67,7 @@ function TapeIcon({
   );
 }
 
-function HeartIcon({
+function HeartWaxIcon({
   active,
   small = false,
 }: {
@@ -74,14 +75,16 @@ function HeartIcon({
   small?: boolean;
 }) {
   return (
-    <svg
-      viewBox="0 0 40 40"
+    <Image
+      src="/assets/heart-wax.png"
+      alt=""
       aria-hidden="true"
-      className={`${styles.heartIcon} ${small ? styles.heartIconSmall : ""}`.trim()}
-      data-active={active}
-    >
-      <path d="M20 35C18 33 4 24 4 15C4 8 8 6 12 8C15 9 18 12 20 15C22 12 25 9 28 8C32 6 36 8 36 15C36 24 22 33 20 35Z" />
-    </svg>
+      width={1000}
+      height={1000}
+      className={`${styles.heartWax} ${small ? styles.heartWaxSmall : ""} ${
+        active ? styles.heartWaxActive : styles.heartWaxInactive
+      }`.trim()}
+    />
   );
 }
 
@@ -456,7 +459,7 @@ export default function HomePage() {
       <div className={styles.archivePage}>
         <button
           type="button"
-          className={styles.topTextLink}
+          className={styles.topBackLink}
           onClick={() => {
             stopAudio();
             setShowArchive(false);
@@ -536,7 +539,7 @@ export default function HomePage() {
                       </button>
 
                       <div className={styles.noteActionGroup}>
-                        <HeartIcon active={isFavorite} small />
+                        <HeartWaxIcon active={isFavorite} small />
                         <button
                           type="button"
                           className={styles.tapeCardButton}
@@ -578,14 +581,22 @@ export default function HomePage() {
       <div className={styles.letterPage}>
         <button
           type="button"
-          className={styles.topTextLink}
+          className={styles.topArchiveButton}
           onClick={() => {
             stopAudio();
             setShowArchive(true);
             setCurrentId(null);
           }}
+          aria-label="Open archive"
         >
-          Archive
+          <Image
+            src="/assets/archive-letter.png"
+            alt=""
+            aria-hidden="true"
+            width={1000}
+            height={1000}
+            className={styles.topArchiveIcon}
+          />
         </button>
 
         <div className={`${styles.letterParchment} ${isRevealing ? styles.letterReveal : ""}`}>
@@ -625,11 +636,11 @@ export default function HomePage() {
 
             <button
               type="button"
-              className={styles.iconButton}
+              className={`${styles.iconButton} ${styles.heartWaxButton}`.trim()}
               onClick={() => updateStatus(currentLetter.id, "hearted")}
               aria-label="Mark as favorite"
             >
-              <HeartIcon active={currentStatus === "hearted"} />
+              <HeartWaxIcon active={currentStatus === "hearted"} />
             </button>
 
             <button
@@ -656,14 +667,22 @@ export default function HomePage() {
       <div className={styles.homeParchment}>
         <button
           type="button"
-          className={styles.topTextLink}
+          className={styles.topArchiveButton}
           onClick={() => {
             stopAudio();
             setShowArchive(true);
             setCurrentId(null);
           }}
+          aria-label="Open archive"
         >
-          Archive
+          <Image
+            src="/assets/archive-letter.png"
+            alt=""
+            aria-hidden="true"
+            width={1000}
+            height={1000}
+            className={styles.topArchiveIcon}
+          />
         </button>
 
         <div className={styles.homeCenter}>
@@ -683,14 +702,6 @@ export default function HomePage() {
 
           <h1 className={styles.homeHeading}>In Case You Forget</h1>
         </div>
-
-        <p className={styles.homeSubtext}>
-          {unreadLetters.length === 0
-            ? "Every letter has been opened. Use Archive to revisit them."
-            : `${unreadLetters.length} unread letter${
-                unreadLetters.length === 1 ? "" : "s"
-              } waiting.`}
-        </p>
       </div>
     </div>
   );
