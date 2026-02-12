@@ -456,7 +456,7 @@ export default function HomePage() {
       <div className={styles.archivePage}>
         <button
           type="button"
-          className={styles.cornerLink}
+          className={styles.topTextLink}
           onClick={() => {
             stopAudio();
             setShowArchive(false);
@@ -521,10 +521,8 @@ export default function HomePage() {
 
                 return (
                   <article key={letter.id} className={styles.noteCard}>
-                    <header className={styles.noteCardHeader}>
-                      <span className={styles.noteTagPill}>{letter.tag}</span>
-                      <span className={styles.noteNumberMark}>{letter.number}</span>
-                    </header>
+                    <span className={styles.noteTagPill}>{letter.tag}</span>
+                    <span className={styles.noteNumberMark}>{letter.number}</span>
 
                     <p className={styles.notePreview}>{toPreview(letter.text)}</p>
 
@@ -538,7 +536,7 @@ export default function HomePage() {
                       </button>
 
                       <div className={styles.noteActionGroup}>
-                        {isFavorite ? <HeartIcon active={true} small /> : null}
+                        <HeartIcon active={isFavorite} small />
                         <button
                           type="button"
                           className={styles.tapeCardButton}
@@ -580,7 +578,7 @@ export default function HomePage() {
       <div className={styles.letterPage}>
         <button
           type="button"
-          className={styles.cornerLink}
+          className={styles.topTextLink}
           onClick={() => {
             stopAudio();
             setShowArchive(true);
@@ -655,43 +653,45 @@ export default function HomePage() {
 
   return (
     <div className={styles.homePage}>
-      <button
-        type="button"
-        className={styles.cornerLink}
-        onClick={() => {
-          stopAudio();
-          setShowArchive(true);
-          setCurrentId(null);
-        }}
-      >
-        Archive
-      </button>
+      <div className={styles.homeParchment}>
+        <button
+          type="button"
+          className={styles.topTextLink}
+          onClick={() => {
+            stopAudio();
+            setShowArchive(true);
+            setCurrentId(null);
+          }}
+        >
+          Archive
+        </button>
 
-      <div className={styles.homeSheet}>
-        <div className={styles.sealPlate}>
-          <button
-            type="button"
-            className={styles.waxSealButton}
-            onClick={openRandomUnread}
-            disabled={unreadLetters.length === 0}
-            aria-label={
-              unreadLetters.length === 0 ? "No unread letters left" : "Open unread letter"
-            }
-          >
-            <span className={styles.waxSealLetter}>F</span>
-          </button>
+        <div className={styles.homeCenter}>
+          <div className={styles.sealPlate}>
+            <button
+              type="button"
+              className={styles.waxSealButton}
+              onClick={openRandomUnread}
+              disabled={unreadLetters.length === 0}
+              aria-label={
+                unreadLetters.length === 0 ? "No unread letters left" : "Open unread letter"
+              }
+            >
+              <span className={styles.waxSealLetter}>F</span>
+            </button>
+          </div>
+
+          <h1 className={styles.homeHeading}>In Case You Forget</h1>
         </div>
 
-        <h1 className={styles.homeHeading}>In Case You Forget</h1>
+        <p className={styles.homeSubtext}>
+          {unreadLetters.length === 0
+            ? "Every letter has been opened. Use Archive to revisit them."
+            : `${unreadLetters.length} unread letter${
+                unreadLetters.length === 1 ? "" : "s"
+              } waiting.`}
+        </p>
       </div>
-
-      <p className={styles.homeSubtext}>
-        {unreadLetters.length === 0
-          ? "Every letter has been opened. Use Archive to revisit them."
-          : `${unreadLetters.length} unread letter${
-              unreadLetters.length === 1 ? "" : "s"
-            } waiting.`}
-      </p>
     </div>
   );
 }
