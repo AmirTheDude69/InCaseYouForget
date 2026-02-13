@@ -433,7 +433,7 @@ export default function HomePage() {
   if (loading) {
     return (
       <div className={styles.pageState}>
-        <div className={styles.messagePanel}>Gathering your letters from the sheet...</div>
+        <div className={styles.messagePanel}>Rummaging through your heap of letters...</div>
       </div>
     );
   }
@@ -478,7 +478,7 @@ export default function HomePage() {
         </button>
 
         <div className={styles.archiveParchment}>
-          <h1 className={styles.archiveHeading}>Archive Gallery</h1>
+          <h1 className={styles.archiveHeading}>Archives</h1>
 
           <div className={styles.archiveControls}>
             <label className={styles.searchWrap}>
